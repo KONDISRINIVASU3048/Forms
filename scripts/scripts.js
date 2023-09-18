@@ -13,7 +13,24 @@ import {
   loadCSS,
 } from './lib-franklin.js';
 
+
+
 const LCP_BLOCKS = []; // add your LCP blocks to the list
+
+
+/**
+ * to add/remove a template, just add/remove it in the list below
+ */
+const TEMPLATE_LIST = [
+  'application-note',
+  'news',
+  'publication',
+  'blog',
+  'event',
+  'about-us',
+  'newsroom',
+  'landing-page',
+];
 
 /**
  * Builds hero block and prepends to main in a new section.
@@ -39,6 +56,27 @@ async function loadFonts() {
     if (!window.location.hostname.includes('localhost')) sessionStorage.setItem('fonts-loaded', 'true');
   } catch (e) {
     // do nothing
+  }
+}
+
+/**
+ * Run template specific decoration code.
+ * @param {Element} main The container element
+ */
+async function decorateTemplates(main) {
+  try {
+    const template = toClassName(getMetadata('template'));
+    const templates = TEMPLATE_LIST;
+    if (templates.includes(template)) {
+      const mod = await import(`../templates/${template}/${template}.js`);
+      loadCSS(`${window.hlx.codeBasePath}/templates/${template}/${template}.css`);
+      if (mod.default) {
+        await mod.default(main);
+      }
+    }
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Auto Blocking failed', error);
   }
 }
 
